@@ -2,6 +2,7 @@ const router = require('express').Router();
 const bcrypt = require('bcrypt');
 const User = require('../models/User');
 
+
 //UPDATE
 router.put('/update/:id', async (req, res) => {
 
@@ -48,7 +49,7 @@ router.delete('/delete/:id', async (req, res) => {
 
 
 //GET ONE
-router.get('/:id', async (req, res) => {
+router.get('/get/:id', async (req, res) => {
 
     try {
         const user = await User.findById(req.params.id);
@@ -87,6 +88,7 @@ router.put('/follow/:id', async (req, res) => {
         res.status(500).json(err);
     }
 });
+
 
 //UNFOLLOW A USER
 router.put('/unfollow/:id', async (req, res) => {
