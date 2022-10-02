@@ -6,7 +6,9 @@ const User = require('../models/User');
 //UPDATE
 router.put('/update/:id', async (req, res) => {
 
-    if (req.body.userId !== req.params.id || !req.body.isAdmin) return res.status(403).json('Only owners can update their account');
+    console.log(req.body.isAdmin, !req.body.isAdmin)
+
+    if (req.body.userId !== req.params.id && !req.body.isAdmin) return res.status(403).json('Only owners can update their account');
 
     //Setting password to new Hashed password if password is given
     if (req.body.password) {
@@ -72,8 +74,8 @@ router.put('/follow/:id', async (req, res) => {
     if (req.body.userId === req.params.id) return res.status(403).json('Invalid userId');
 
     try {
-        const currentUser = await User.findById(req.params.id);
-        const userToBeFollowed = await User.findById(req.body.userId);
+        const currentUser = await User.findById(req.body.userId.trim());
+        const userToBeFollowed = await User.findById(req.params.id);
 
         !userToBeFollowed && res.status(404).json('User not found');
 
@@ -96,8 +98,8 @@ router.put('/unfollow/:id', async (req, res) => {
     if (req.body.userId === req.params.id) return res.status(403).json('Invalid userId');
 
     try {
-        const currentUser = await User.findById(req.params.id);
-        const userToBeUnfollowed = await User.findById(req.body.userId);
+        const userToBeUnfollowed = await User.findById(req.params.id);
+        const currentUser = await User.findById(req.body.userId.trim());
 
         !userToBeUnfollowed && res.status(404).json('User not found');
 

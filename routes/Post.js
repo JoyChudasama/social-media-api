@@ -1,16 +1,21 @@
 const router = require('express').Router();
 const Post = require('../models/Post');
+const User = require('../models/User');
 
 //CREATE A POST
 router.post('/create', async (req, res) => {
 
-    if (!req.body.userId || ((!req.body.description || req.body.description.trim().length === 0) && (!req.body.img || req.body.img.trim().length === 0))) {
+    const userId = req.body.userId.trim();
+    const description = req.body.description.trim();
+    const img = req.body.img.trim();
+
+    if (!userId || ((!description || description.length === 0) && (!img || img.length === 0))) {
         return res.status(403).json('userId and description or img is required');
     }
 
     try {
         const post = new Post({
-            userId: req.body.userId.trim(),
+            userId: userId,
             description: req.body.description,
             img: req.body.img,
         });
@@ -26,20 +31,25 @@ router.post('/create', async (req, res) => {
 //UPDATE A POST
 router.put('/update/:id', async (req, res) => {
 
-    if (!req.params.id || !req.body.userId) return res.status(403).json('postId and userId is required');
+    const postId = req.params.id.trim();
+    const userId = req.body.userId.trim();
+    const description = req.body.description.trim();
+    const img = req.body.img.trim();
+
+    if (!postId || !userId) return res.status(403).json('postId and userId is required');
 
     try {
-        const post = await Post.findById(req.params.id);
+        const post = await Post.findById(postId);
 
         if (!post) return res.status(403).json('Post not found');
 
-        if ((!req.body.description || req.body.description.trim().length === 0) && (!req.body.img || req.body.img.trim().length === 0)) {
+        if ((!description || description.length === 0) && (!img || img.length === 0)) {
             return res.status(403).json('Description or img is required');
         }
 
-        if (post.userId !== req.body.userId.trim()) return res.status(403).json('Only owners can update their posts');
+        if (post.userId !== userId) return res.status(403).json('Only owners can update their posts');
 
-        await Post.findByIdAndUpdate(req.params.id, {
+        await Post.findByIdAndUpdate(postId, {
             $set: req.body
         });
 
@@ -54,16 +64,19 @@ router.put('/update/:id', async (req, res) => {
 //DELETE A POST
 router.delete('/delete/:id', async (req, res) => {
 
-    if (!req.params.id || !req.body.userId) return res.status(403).json('postId and userId is required');
+    const postId = req.params.id.trim();
+    const userId = req.body.userId.trim();
+
+    if (!postId || !userId) return res.status(403).json('postId and userId is required');
 
     try {
-        const post = await Post.findById(req.params.id.trim());
+        const post = await Post.findById(postId);
 
         if (!post) return res.status(403).json('Post not found');
 
-        if (post.userId !== req.body.userId.trim()) return res.status(403).json('Only owners can delete their posts');
+        if (post.userId !== userId) return res.status(403).json('Only owners can delete their posts');
 
-        await Post.findByIdAndDelete(req.params.id);
+        await Post.findByIdAndDelete(postId);
 
         res.status(200).json('Post has been deleted succesfully');
 
@@ -76,10 +89,12 @@ router.delete('/delete/:id', async (req, res) => {
 //GET A POST
 router.get('/get/:id', async (req, res) => {
 
-    if (!req.params.id) return res.status(403).json('postId is required');
+    const postId = req.params.id.trim();
+
+    if (!postId) return res.status(403).json('postId is required');
 
     try {
-        const post = await Post.findById(req.params.id);
+        const post = await Post.findById(postId);
 
         if (!post) return res.status(404).json('User not found');
 
@@ -91,15 +106,17 @@ router.get('/get/:id', async (req, res) => {
 })
 
 
-//GET ALL USER'S POSTS
-router.get('/getAllForUser/:id', async (req, res) => {
+//GET USER'S ALL POSTS
+router.get('/getAllForUser', async (req, res) => {
 
-    if (!req.params.id) return res.status(403).json('userId is required');
+    const userId = req.body.userId.trim();
+
+    if (!userId) return res.status(403).json('userId is required');
 
     try {
-        const posts = await Post.find({ userId: req.params.id });
+        const posts = await Post.find({ userId: userId });
 
-        res.status(200).json(posts);
+        res.status(200).json({ posts: posts });
 
     } catch (err) {
         res.status(500).json(err);
@@ -110,20 +127,23 @@ router.get('/getAllForUser/:id', async (req, res) => {
 //LIKE A POST
 router.put('/like/:id', async (req, res) => {
 
-    if (!req.params.id || !req.body.userId) return res.status(403).json('postId and userId is required');
+    const postId = req.params.id.trim();
+    const userId = req.body.userId.trim();
+
+    if (!postId || !userId) return res.status(403).json('postId and userId is required');
 
     try {
-        const post = await Post.findById(req.params.id);
+        const post = await Post.findById(postId);
 
         if (!post) return res.status(403).json('Post not found');
 
         //Dislikes post if already liked
-        if (post.likes.includes(req.body.userId)) {
-            await post.updateOne({ $pull: { likes: req.body.userId } });
+        if (post.likes.includes(userId)) {
+            await post.updateOne({ $pull: { likes: userId } });
             return res.status(403).json('Post has been disliked succesfully');
         }
 
-        await post.updateOne({ $push: { likes: req.body.userId } });
+        await post.updateOne({ $push: { likes: userId } });
         res.status(200).json('Post has been liked succesfully');
 
     } catch (err) {
@@ -133,12 +153,23 @@ router.put('/like/:id', async (req, res) => {
 
 
 //GET USER'S TIMELINE POSTS
-router.get('/getTimelinePostsForUser/:id', async (req, res) => {
+router.get('/getTimelinePostsForUser', async (req, res) => {
 
-    if (!req.params.id) return res.status(403).json('userId is required');
-   
+    const userId = req.body.userId.trim();
+
+    if (!userId) return res.status(403).json('userId is required');
+
     try {
-        res.status(200).json('USERS TIMELINE POSTS');
+
+        const currentUser = await User.findById(userId);
+
+        const followingsPosts = await Promise.all(
+            currentUser.followings.map(followingUserId => {
+                return Post.find({ userId: followingUserId });
+            })
+        )
+
+        res.status(200).json({ posts: followingsPosts.flat() });
     } catch (err) {
         res.status(500).json(err);
     }
