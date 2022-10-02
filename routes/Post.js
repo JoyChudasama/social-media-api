@@ -5,11 +5,12 @@ const User = require('../models/User');
 //CREATE A POST
 router.post('/create', async (req, res) => {
 
-    const userId = req.body.userId.trim();
-    const description = req.body.description.trim();
-    const img = req.body.img.trim();
+    const userId = req.body.userId && req.body.userId.trim();
+    const description = req.body.description;
+    const descriptionLength = req.body.description ? description.trim().length : 0;
+    const img = req.body.img && req.body.img.trim();
 
-    if (!userId || ((!description || description.length === 0) && (!img || img.length === 0))) {
+    if (!userId || ((!description || descriptionLength === 0) && (!img || img.length === 0))) {
         return res.status(403).json('userId and description or img is required');
     }
 
@@ -31,10 +32,11 @@ router.post('/create', async (req, res) => {
 //UPDATE A POST
 router.put('/update/:id', async (req, res) => {
 
-    const postId = req.params.id.trim();
-    const userId = req.body.userId.trim();
-    const description = req.body.description.trim();
-    const img = req.body.img.trim();
+    const postId = req.params.id && req.params.id.trim();
+    const userId = req.body.userId && req.body.userId.trim();
+    const description = req.body.description;
+    const descriptionLength = description ? description.trim().length : 0;
+    const img = req.body.img && req.body.img.trim();
 
     if (!postId || !userId) return res.status(403).json('postId and userId is required');
 
@@ -43,7 +45,7 @@ router.put('/update/:id', async (req, res) => {
 
         if (!post) return res.status(403).json('Post not found');
 
-        if ((!description || description.length === 0) && (!img || img.length === 0)) {
+        if ((!description || descriptionLength === 0) && (!img || img.length === 0)) {
             return res.status(403).json('Description or img is required');
         }
 
@@ -64,8 +66,8 @@ router.put('/update/:id', async (req, res) => {
 //DELETE A POST
 router.delete('/delete/:id', async (req, res) => {
 
-    const postId = req.params.id.trim();
-    const userId = req.body.userId.trim();
+    const postId = req.params.id && req.params.id.trim();
+    const userId = req.body.userId && req.body.userId.trim();
 
     if (!postId || !userId) return res.status(403).json('postId and userId is required');
 
@@ -89,7 +91,7 @@ router.delete('/delete/:id', async (req, res) => {
 //GET A POST
 router.get('/get/:id', async (req, res) => {
 
-    const postId = req.params.id.trim();
+    const postId = req.params.id && req.params.id.trim();
 
     if (!postId) return res.status(403).json('postId is required');
 
@@ -109,7 +111,7 @@ router.get('/get/:id', async (req, res) => {
 //GET USER'S ALL POSTS
 router.get('/getAllForUser', async (req, res) => {
 
-    const userId = req.body.userId.trim();
+    const userId = req.body.userId && req.body.userId.trim();
 
     if (!userId) return res.status(403).json('userId is required');
 
@@ -127,8 +129,8 @@ router.get('/getAllForUser', async (req, res) => {
 //LIKE A POST
 router.put('/like/:id', async (req, res) => {
 
-    const postId = req.params.id.trim();
-    const userId = req.body.userId.trim();
+    const postId = req.params.id && req.params.id.trim();
+    const userId = req.body.userId && req.body.userId.trim();
 
     if (!postId || !userId) return res.status(403).json('postId and userId is required');
 
@@ -136,6 +138,12 @@ router.put('/like/:id', async (req, res) => {
         const post = await Post.findById(postId);
 
         if (!post) return res.status(403).json('Post not found');
+        
+        const postOwner = await User.findById(post.userId);
+        
+        if (!postOwner) return res.status(403).json('Post Creator not found');
+
+        if(!postOwner.followers.includes(userId)) return res.status(403).json('Only followers can like or dislike posts');
 
         //Dislikes post if already liked
         if (post.likes.includes(userId)) {
@@ -155,7 +163,7 @@ router.put('/like/:id', async (req, res) => {
 //GET USER'S TIMELINE POSTS
 router.get('/getTimelinePostsForUser', async (req, res) => {
 
-    const userId = req.body.userId.trim();
+    const userId = req.body.userId && req.body.userId.trim();
 
     if (!userId) return res.status(403).json('userId is required');
 

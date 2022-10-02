@@ -6,6 +6,7 @@ const morgan = require('morgan');
 const userRoute = require('./routes/User');
 const authRoute = require('./routes/Auth');
 const postRoute = require('./routes/Post');
+const commentRoute = require('./routes/Comment');
 
 const app = express();
 
@@ -24,6 +25,7 @@ app.use(morgan('common'));
 app.use('/api/users', userRoute);
 app.use('/api/auth', authRoute);
 app.use('/api/posts', postRoute);
+app.use('/api/comments', commentRoute);
 
 app.get('/', (req, res) => {
     res.send('Use /api routes')
