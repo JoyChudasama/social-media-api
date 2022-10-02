@@ -6,8 +6,6 @@ const User = require('../models/User');
 //UPDATE
 router.put('/update/:id', async (req, res) => {
 
-    console.log(req.body.isAdmin, !req.body.isAdmin)
-
     if (req.body.userId !== req.params.id && !req.body.isAdmin) return res.status(403).json('Only owners can update their account');
 
     //Setting password to new Hashed password if password is given
