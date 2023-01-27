@@ -10,7 +10,7 @@
 
 ### 1. Install Dependencies
 
-- Run folowing command for installing the necessary dependencies.
+- Run following command for installing the necessary dependencies.
 
         npm i
 
