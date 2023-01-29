@@ -7,6 +7,8 @@ const User = require("../models/User");
 dotenv.config();
 
 beforeAll(async () => {
+  jest.setTimeout(60000);
+
   mongoose.connect(process.env.MONGO_URL, { useNewUrlParser: true, useUnifiedTopology: true });
 });
 
