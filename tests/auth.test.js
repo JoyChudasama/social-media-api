@@ -10,11 +10,9 @@ beforeAll(async () => {
   mongoose.connect(process.env.MONGO_URL, { useNewUrlParser: true, useUnifiedTopology: true });
 });
 
+// Deletes testUser before closing connection after all tests are done
 afterAll(async () => {
-
-  // Deletes testUser before closing connection
   await User.deleteOne({ username: testUser.username });
-
   await mongoose.connection.close();
 });
 

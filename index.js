@@ -31,8 +31,4 @@ app.get('/', (req, res) => {
     res.send('Use /api routes')
 })
 
-app.listen(8800, () => {
-    console.log("Server is running...")
-})
-
 module.exports = app;
