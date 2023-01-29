@@ -8,10 +8,14 @@ dotenv.config();
 
 beforeEach(async () => {
   await mongoose.connect(process.env.MONGO_URL, { useNewUrlParser: true, useUnifiedTopology: true });
+
+  return;
 });
 
 afterEach(async () => {
   await mongoose.connection.close();
+
+  return;
 });
 
 // Deletes testUser after all tests are done
@@ -19,6 +23,8 @@ afterAll(async () => {
   await mongoose.connect(process.env.MONGO_URL, { useNewUrlParser: true, useUnifiedTopology: true });
   await User.deleteOne({ username: testUser.username });
   await mongoose.connection.close();
+
+  return;
 })
 
 const testUser = {
@@ -32,12 +38,11 @@ describe("POST /api/auth/register", () => {
 
     const res = await request(app).post("/api/auth/register").send(testUser);
 
-    return [
-      expect(res.statusCode).toBe(200),
-      expect(res.body.username).toBe(testUser.username),
-      expect(res.body.email).toBe(testUser.email)
-    ];
+    expect(res.statusCode).toBe(200);
+    expect(res.body.username).toBe(testUser.username);
+    expect(res.body.email).toBe(testUser.email);
 
+    return;
   });
 });
 
@@ -50,6 +55,8 @@ describe("POST api/auth/login", () => {
       password: testUser.password
     });
 
-    return expect(res.statusCode).toBe(200);
+    expect(res.statusCode).toBe(200);
+
+    return;
   });
 });
