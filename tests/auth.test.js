@@ -6,17 +6,20 @@ const User = require("../models/User");
 
 dotenv.config();
 
-beforeAll(async () => {
-  jest.setTimeout(60000);
-
-  mongoose.connect(process.env.MONGO_URL, { useNewUrlParser: true, useUnifiedTopology: true });
+beforeEach(async () => {
+  await mongoose.connect(process.env.MONGO_URL, { useNewUrlParser: true, useUnifiedTopology: true });
 });
 
-// Deletes testUser before closing connection after all tests are done
-afterAll(async () => {
-  await User.deleteOne({ username: testUser.username });
+afterEach(async () => {
   await mongoose.connection.close();
 });
+
+// Deletes testUser after all tests are done
+afterAll(async () => {
+  await mongoose.connect(process.env.MONGO_URL, { useNewUrlParser: true, useUnifiedTopology: true });
+  await User.deleteOne({ username: testUser.username });
+  await mongoose.connection.close();
+})
 
 const testUser = {
   "username": "testUser",
@@ -29,9 +32,12 @@ describe("POST /api/auth/register", () => {
 
     const res = await request(app).post("/api/auth/register").send(testUser);
 
-    expect(res.statusCode).toBe(200);
-    expect(res.body.username).toBe(testUser.username);
-    expect(res.body.email).toBe(testUser.email);
+    return [
+      expect(res.statusCode).toBe(200),
+      expect(res.body.username).toBe(testUser.username),
+      expect(res.body.email).toBe(testUser.email)
+    ];
+
   });
 });
 
@@ -44,6 +50,6 @@ describe("POST api/auth/login", () => {
       password: testUser.password
     });
 
-    expect(res.statusCode).toBe(200);
+    return expect(res.statusCode).toBe(200);
   });
 });
