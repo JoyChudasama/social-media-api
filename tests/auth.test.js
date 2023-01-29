@@ -9,7 +9,7 @@ dotenv.config();
 beforeAll(async () => {
   mongoose.connect(process.env.MONGO_URL, { useNewUrlParser: true, useUnifiedTopology: true });
 });
- 
+
 afterAll(async () => {
 
   // Deletes testUser before closing connection
