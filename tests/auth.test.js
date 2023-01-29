@@ -2,21 +2,26 @@ const mongoose = require("mongoose");
 const request = require("supertest");
 const app = require("../index");
 const dotenv = require('dotenv');
+const User = require("../models/User");
 
 dotenv.config();
 
-beforeEach(async () => {
-  mongoose.connect(process.env.MONGO_URL);
+beforeAll(async () => {
+  mongoose.connect(process.env.MONGO_URL, { useNewUrlParser: true, useUnifiedTopology: true });
 });
 
-afterEach(async () => {
+afterAll(async () => {
+
+  // Deletes testUser before closing connection
+  await User.deleteOne({ username: testUser.username });
+
   await mongoose.connection.close();
 });
 
 const testUser = {
   "username": "testUser",
   "email": "testUser@test.com",
-  "password": "testUser",
+  "password": "testUser090",
 };
 
 describe("POST /api/auth/register", () => {
@@ -25,8 +30,8 @@ describe("POST /api/auth/register", () => {
     const res = await request(app).post("/api/auth/register").send(testUser);
 
     expect(res.statusCode).toBe(200);
-    expect(res.body.username).toBe('testUser');
-    expect(res.body.email).toBe('testUser@test.com');
+    expect(res.body.username).toBe(testUser.username);
+    expect(res.body.email).toBe(testUser.email);
   });
 });
 
@@ -42,5 +47,3 @@ describe("POST api/auth/login", () => {
     expect(res.statusCode).toBe(200);
   });
 });
-
-
