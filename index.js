@@ -5,8 +5,8 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const userRoute = require('./routes/user');
 const authRoute = require('./routes/auth');
-const postRoute = require('./routes/post');
-const commentRoute = require('./routes/comment');
+const postRoute = require('./routes/Post');
+const commentRoute = require('./routes/Comment');
 
 const app = express();
 
